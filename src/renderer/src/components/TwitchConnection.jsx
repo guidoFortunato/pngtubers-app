@@ -5,6 +5,7 @@ export default function TwitchConnection({ onEvent }) {
   const [channel, setChannel] = useState('')
   const [accessToken, setAccessToken] = useState('')
   const [isConnected, setIsConnected] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
   const [connectionStatus, setConnectionStatus] = useState('')
 
@@ -24,25 +25,40 @@ export default function TwitchConnection({ onEvent }) {
       setError('Por favor ingresa el nombre del canal y el token de acceso')
       return
     }
+    console.log({ isConnected, channel, accessToken })
 
     setConnectionStatus('Conectando...')
     setError('')
     setIsConnected(false)
 
     try {
-      await window.api.twitch.connect(channel, accessToken)
+      setIsLoading(true)
+      const success = await window.api.twitch.connect(channel, accessToken)
+      console.log({ success })
+      if (!success) {
+        setError('Error al conectar con Twitch')
+        setConnectionStatus('Error de conexión')
+        setIsConnected(false)
+        return
+      }
       setIsConnected(true)
       setConnectionStatus('Conectado al canal')
       setError('')
     } catch (err) {
+      console.error('Error connecting to Twitch:', err)
       setIsConnected(false)
+      setConnectionStatus('Error de conexión')
       setError(err.message || 'Error al conectar con Twitch')
-      setConnectionStatus('')
+      // Notificar al componente padre sobre el error
+      onEvent('error', { message: err.message })
+    } finally {
+      setIsLoading(false)
     }
   }
 
   const handleDisconnect = async () => {
     try {
+      setIsLoading(true)
       await window.api.twitch.disconnect()
       setIsConnected(false)
       setError('')
@@ -54,6 +70,8 @@ export default function TwitchConnection({ onEvent }) {
       onEvent('disconnect', null)
     } catch (err) {
       setError('Error al desconectar de Twitch: ' + err.message)
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -101,8 +119,9 @@ export default function TwitchConnection({ onEvent }) {
           <button
             onClick={handleConnect}
             className="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            disabled={isLoading}
           >
-            Conectar
+            {isLoading ? 'Conectando...' : 'Conectar'}
           </button>
         </div>
       ) : (
