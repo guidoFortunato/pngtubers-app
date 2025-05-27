@@ -101,7 +101,7 @@ export default function TwitchConnection({ onEvent }) {
               placeholder="OAuth token"
               className="mt-1 block w-full text-sm p-1 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
             />
-            {/* <p className="mt-3 text-sm text-gray-500">
+            <p className="mt-3 text-sm text-gray-500">
               Obtén tu token en{' '}
               <a
                 href="https://twitchtokengenerator.com/"
@@ -111,7 +111,7 @@ export default function TwitchConnection({ onEvent }) {
               >
                 twitchtokengenerator.com
               </a>
-            </p> */}
+            </p>
           </div>
 
           {error && <p className="text-red-500 text-sm">{error}</p>}
